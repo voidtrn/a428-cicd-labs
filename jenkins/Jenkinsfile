@@ -1,9 +1,8 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:lts-buster-slim'
-            args '-p 3000:3000 --dns 8.8.8.8 --dns 8.8.4.4'
-        }
+    agent any
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
     // environment {
     //     CI = 'true'
@@ -29,6 +28,7 @@ pipeline {
     }
     post {
         always {
+            echo 'Cleaning workspace...'
             cleanWs()
         }
     }
