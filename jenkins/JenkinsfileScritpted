@@ -1,0 +1,31 @@
+properties([
+    disableConcurrentBuilds(),
+    pipelineTriggers([
+        pollSCM('H/2 * * * *')
+    ])
+])
+
+node {
+    try {
+        timestamps {
+            stage('Checkout') {
+                echo 'Checking out source code...'
+                git branch: 'react-app',
+                    url: 'https://github.com/voidtrn/a428-cicd-labs'
+            }
+
+            stage('Build') {
+                echo 'Installing dependencies...'
+                sh 'npm install'
+            }
+
+            stage('Test') {
+                echo 'Running tests...'
+                sh './jenkins/scripts/test.sh'
+            }
+        }
+    } finally {
+        echo 'Cleaning workspace...'
+        cleanWs()
+    }
+}

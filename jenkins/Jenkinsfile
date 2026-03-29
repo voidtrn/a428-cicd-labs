@@ -1,31 +1,38 @@
-properties([
-    disableConcurrentBuilds(),
-    pipelineTriggers([
-        pollSCM('H/2 * * * *')
-    ])
-])
-
-node {
-    try {
-        timestamps {
-            stage('Checkout') {
-                echo 'Checking out source code...'
-                git branch: 'react-app',
+pipeline {
+    agent any
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'react-app', 
                     url: 'https://github.com/voidtrn/a428-cicd-labs'
             }
-
-            stage('Build') {
-                echo 'Installing dependencies...'
+        }
+        stage('Build') {
+            steps {
                 sh 'npm install'
             }
-
-            stage('Test') {
-                echo 'Running tests...'
+        }
+        stage('Test') {
+            steps {
                 sh './jenkins/scripts/test.sh'
             }
         }
-    } finally {
-        echo 'Cleaning workspace...'
-        cleanWs()
+        stage('Deploy') { 
+            steps {
+                sh './jenkins/scripts/deliver.sh' 
+                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
+                sh './jenkins/scripts/kill.sh' 
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
     }
 }
