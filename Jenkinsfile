@@ -4,6 +4,9 @@ pipeline {
         timestamps()
         disableConcurrentBuilds()
     }
+    environment {
+        NODE_OPTIONS = '--openssl-legacy-provider'
+    }
     triggers {
         pollSCM('H/2 * * * *')
     }
@@ -34,7 +37,7 @@ pipeline {
                 sh './jenkins/scripts/deliver.sh'
                 echo 'React App berhasil dijalankan. Menunggu 1 menit sebelum dihentikan otomatis...'
                 sleep time: 1, unit: 'MINUTES'
-                sh './jenkins/scripts/kill.sh'
+                sh './jenkins/scripts/kill.sh || true'
             }
         }
     }
