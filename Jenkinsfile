@@ -4,6 +4,9 @@ pipeline {
         timestamps()
         disableConcurrentBuilds()
     }
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -21,11 +24,17 @@ pipeline {
                 sh './jenkins/scripts/test.sh'
             }
         }
-        stage('Deploy') { 
+        stage('Manual Approval') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
-                sh './jenkins/scripts/kill.sh' 
+                input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh './jenkins/scripts/deliver.sh'
+                echo 'React App berhasil dijalankan. Menunggu 1 menit sebelum dihentikan otomatis...'
+                sleep time: 1, unit: 'MINUTES'
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
